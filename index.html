@@ -823,6 +823,194 @@ document.querySelectorAll('.faq-question').forEach(function(btn) {
 {% endschema %}</pre></div>
     </div></div></div>
 
+    <div class="snippet-section-label"><i class="fas fa-shield-halved" style="margin-right:8px"></i>Trust and Conversion</div>
+
+    <div class="collapsible"><button class="collapsible-trigger">6. Trust Badges <i class="fas fa-chevron-down"></i></button><div class="collapsible-body"><div class="collapsible-inner">
+      <div class="snippet-meta"><span class="snippet-badge file">sections/trust-badges.liquid</span><span class="snippet-badge easy">Easy</span></div>
+      <p>Displays icon + label pairs (secure checkout, free returns, etc.) in a row. Add to your product page JSON template.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">Liquid</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre>&lt;style&gt;
+.trust-bar { display:flex; flex-wrap:wrap; justify-content:center; gap:24px; padding:24px 20px; }
+.trust-item { display:flex; align-items:center; gap:10px; font-size:13px; font-weight:500; color:inherit; }
+.trust-item i { font-size:20px; color:{{ section.settings.icon_color }}; }
+&lt;/style&gt;
+&lt;div class="trust-bar" style="background:{{ section.settings.bg_color }}"&gt;
+  {% for block in section.blocks %}
+    &lt;div class="trust-item" {{ block.shopify_attributes }}&gt;
+      &lt;i class="{{ block.settings.icon }}"&gt;&lt;/i&gt;
+      &lt;span&gt;{{ block.settings.label }}&lt;/span&gt;
+    &lt;/div&gt;
+  {% endfor %}
+&lt;/div&gt;
+{% schema %}
+{
+  "name": "Trust Badges",
+  "settings": [
+    { "type": "color", "id": "bg_color",   "label": "Background", "default": "#f5f5f5" },
+    { "type": "color", "id": "icon_color", "label": "Icon Color",  "default": "#1a1a1a" }
+  ],
+  "blocks": [{
+    "type": "badge", "name": "Badge",
+    "settings": [
+      { "type": "text", "id": "icon",  "label": "Font Awesome class", "default": "fas fa-lock" },
+      { "type": "text", "id": "label", "label": "Label", "default": "Secure Checkout" }
+    ]
+  }],
+  "presets": [{
+    "name": "Trust Badges",
+    "blocks": [
+      { "type": "badge", "settings": { "icon": "fas fa-lock",          "label": "Secure Checkout" } },
+      { "type": "badge", "settings": { "icon": "fas fa-rotate-left",   "label": "Free Returns" } },
+      { "type": "badge", "settings": { "icon": "fas fa-truck",         "label": "Free Shipping $75+" } },
+      { "type": "badge", "settings": { "icon": "fas fa-headset",       "label": "24/7 Support" } }
+    ]
+  }]
+}
+{% endschema %}</pre></div>
+    </div></div></div>
+
+    <div class="collapsible"><button class="collapsible-trigger">7. Sticky Add-to-Cart Bar <i class="fas fa-chevron-down"></i></button><div class="collapsible-body"><div class="collapsible-inner">
+      <div class="snippet-meta"><span class="snippet-badge file">snippets/sticky-atc.liquid</span><span class="snippet-badge js">+ JS</span><span class="snippet-badge medium">Medium</span></div>
+      <p>Appears at the bottom of the viewport once the main ATC button scrolls out of view. Add <code>{% render 'sticky-atc', product: product %}</code> inside <code>sections/main-product.liquid</code> and give your main ATC button <code>id="main-atc"</code>.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">Liquid</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre>&lt;div id="sticky-atc" style="
+  position:fixed; bottom:0; left:0; right:0; z-index:80;
+  background:#fff; border-top:1px solid #e5e5e5;
+  padding:12px 20px; display:flex; align-items:center;
+  gap:16px; transform:translateY(100%);
+  transition:transform .3s ease; box-shadow:0 -4px 20px rgba(0,0,0,.08);"&gt;
+  &lt;div style="flex:1; min-width:0;"&gt;
+    &lt;div style="font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"&gt;
+      {{ product.title }}
+    &lt;/div&gt;
+    &lt;div style="font-size:13px; color:#666;"&gt;{{ product.selected_or_first_available_variant.price | money }}&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;button
+    type="button"
+    onclick="document.getElementById('main-atc').click()"
+    style="padding:12px 28px; background:{{ settings.color_button }};
+      color:{{ settings.color_button_text }}; border:none; border-radius:6px;
+      font-weight:600; font-size:14px; cursor:pointer; white-space:nowrap;"&gt;
+    Add to Cart
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;script&gt;
+(function() {
+  var bar   = document.getElementById('sticky-atc');
+  var mainBtn = document.getElementById('main-atc');
+  if (!bar || !mainBtn) return;
+  var io = new IntersectionObserver(function(entries) {
+    bar.style.transform = entries[0].isIntersecting ? 'translateY(100%)' : 'translateY(0)';
+  }, { threshold: 0 });
+  io.observe(mainBtn);
+})();
+&lt;/script&gt;</pre></div>
+    </div></div></div>
+
+    <div class="collapsible"><button class="collapsible-trigger">8. Cookie Consent Banner <i class="fas fa-chevron-down"></i></button><div class="collapsible-body"><div class="collapsible-inner">
+      <div class="snippet-meta"><span class="snippet-badge file">snippets/cookie-banner.liquid</span><span class="snippet-badge js">+ JS</span><span class="snippet-badge easy">Easy</span></div>
+      <p>Add <code>{% render 'cookie-banner' %}</code> before <code>&lt;/body&gt;</code> in <code>layout/theme.liquid</code>. Dismissal persists via <code>localStorage</code> — banner won't reappear after acceptance.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">Liquid</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre>&lt;div id="cookie-banner" style="
+  position:fixed; bottom:20px; left:20px; right:20px; max-width:480px;
+  background:#1a1a1a; color:#fff; border-radius:10px;
+  padding:18px 20px; z-index:999;
+  display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+  box-shadow:0 8px 32px rgba(0,0,0,.3); font-size:13px;"
+  role="dialog" aria-label="Cookie consent"&gt;
+  &lt;p style="margin:0; flex:1; min-width:200px; color:rgba(255,255,255,.8);"&gt;
+    We use cookies to improve your experience.
+    &lt;a href="/policies/privacy-policy" style="color:#e5a435;"&gt;Learn more&lt;/a&gt;
+  &lt;/p&gt;
+  &lt;button onclick="acceptCookies()"
+    style="padding:9px 20px; background:#e5a435; color:#0e0f13;
+      border:none; border-radius:6px; font-weight:700;
+      font-size:13px; cursor:pointer; white-space:nowrap;"&gt;
+    Accept
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;script&gt;
+(function() {
+  var banner = document.getElementById('cookie-banner');
+  if (localStorage.getItem('cookies_accepted')) banner.style.display = 'none';
+  window.acceptCookies = function() {
+    localStorage.setItem('cookies_accepted', '1');
+    banner.style.display = 'none';
+  };
+})();
+&lt;/script&gt;</pre></div>
+    </div></div></div>
+
+    <div class="snippet-section-label"><i class="fas fa-bolt" style="margin-right:8px"></i>Interactive and Utility</div>
+
+    <div class="collapsible"><button class="collapsible-trigger">9. Image Zoom on Hover <i class="fas fa-chevron-down"></i></button><div class="collapsible-body"><div class="collapsible-inner">
+      <div class="snippet-meta"><span class="snippet-badge file">snippets/image-zoom.liquid</span><span class="snippet-badge css">CSS only</span><span class="snippet-badge easy">Easy</span></div>
+      <p>Pure CSS zoom — no JS required. Wrap any product image with this snippet. Pass the image object and an optional alt string.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">Liquid</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre>{% comment %} Usage: {% render 'image-zoom', image: product.featured_image %} {% endcomment %}
+&lt;div class="img-zoom-wrap"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="{{ image | image_url: width: 1000, format: 'webp' }}" type="image/webp"&gt;
+    &lt;img
+      src="{{ image | image_url: width: 1000 }}"
+      alt="{{ image.alt | escape }}"
+      width="{{ image.width }}"
+      height="{{ image.height }}"
+      loading="lazy"
+      decoding="async"
+      class="img-zoom"
+    &gt;
+  &lt;/picture&gt;
+&lt;/div&gt;
+&lt;style&gt;
+.img-zoom-wrap { overflow: hidden; border-radius: 8px; }
+.img-zoom {
+  width: 100%; height: auto; display: block;
+  transition: transform 0.4s ease;
+  transform-origin: center center;
+}
+.img-zoom-wrap:hover .img-zoom { transform: scale(1.08); }
+&lt;/style&gt;</pre></div>
+    </div></div></div>
+
+    <div class="collapsible"><button class="collapsible-trigger">10. Sale Countdown Timer <i class="fas fa-chevron-down"></i></button><div class="collapsible-body"><div class="collapsible-inner">
+      <div class="snippet-meta"><span class="snippet-badge file">snippets/countdown-timer.liquid</span><span class="snippet-badge js">+ JS</span><span class="snippet-badge medium">Medium</span></div>
+      <p>Displays a live HH:MM:SS countdown to a deadline set in section settings. When time expires the element hides itself automatically.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">Liquid</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre>{% comment %} Usage: {% render 'countdown-timer', deadline: section.settings.sale_end %} {% endcomment %}
+{% if deadline != blank %}
+&lt;div id="countdown-wrap" style="
+  display:inline-flex; gap:6px; align-items:center;
+  font-family:monospace; font-size:15px; font-weight:700;"&gt;
+  &lt;i class="fas fa-clock" style="color:#e05555;"&gt;&lt;/i&gt;
+  &lt;span id="countdown-display"&gt;&lt;/span&gt;
+&lt;/div&gt;
+&lt;script&gt;
+(function() {
+  var end  = new Date("{{ deadline }}").getTime();
+  var wrap = document.getElementById('countdown-wrap');
+  var disp = document.getElementById('countdown-display');
+  if (!wrap || isNaN(end)) return;
+
+  function pad(n) { return String(n).padStart(2,'0'); }
+  function tick() {
+    var diff = end - Date.now();
+    if (diff &lt;= 0) { wrap.style.display = 'none'; return; }
+    var h = Math.floor(diff / 3600000);
+    var m = Math.floor((diff % 3600000) / 60000);
+    var s = Math.floor((diff % 60000)   / 1000);
+    disp.textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+&lt;/script&gt;
+{% endif %}</pre></div>
+      <p>In your section schema, add a datetime setting to let merchants set the deadline:</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">JSON — schema setting</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre>{ "type": "text", "id": "sale_end", "label": "Sale ends (ISO 8601)", "default": "2025-12-31T23:59:59" }</pre></div>
+    </div></div></div>
+
     <nav class="chapter-nav">
       <button class="chapter-nav-btn" data-goto="ch10"><div class="nav-label">Previous</div><div class="nav-title">Best Practices</div></button>
       <button class="chapter-nav-btn next" data-goto="ch12"><div class="nav-label">Next Chapter</div><div class="nav-title">Launch Checklist</div></button>
