@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -253,10 +252,12 @@
     <button class="nav-item" data-chapter="ch11"><i class="fas fa-box-open"></i> Snippet Vault <span class="chapter-num">11</span></button>
     <button class="nav-item" data-chapter="ch12"><i class="fas fa-clipboard-check"></i> Launch Checklist <span class="chapter-num">12</span></button>
     <button class="nav-item" data-chapter="ch13"><i class="fas fa-handshake-angle"></i> Client Handoff <span class="chapter-num">13</span></button>
+    <span class="nav-section-label">Reference</span>
+    <button class="nav-item" data-chapter="ch14"><i class="fas fa-terminal"></i> CLI Command Key <span class="chapter-num">14</span></button>
   </nav>
   <div class="sidebar-footer">
     <div style="display:flex;justify-content:space-between;align-items:center;">
-      <span id="progressText">0 / 13 completed</span>
+      <span id="progressText">0 / 14 completed</span>
       <span id="progressPercent">0%</span>
     </div>
     <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
@@ -1050,6 +1051,108 @@ document.querySelectorAll('.faq-question').forEach(function(btn) {
 
     <nav class="chapter-nav">
       <button class="chapter-nav-btn" data-goto="ch12"><div class="nav-label">Previous</div><div class="nav-title">Launch Checklist</div></button>
+      <button class="chapter-nav-btn next" data-goto="ch14"><div class="nav-label">Next Chapter</div><div class="nav-title">CLI Command Key</div></button>
+    </nav>
+  </article>
+
+
+  <!-- CH14 -->
+  <article class="chapter" id="ch14">
+    <div class="chapter-header">
+      <div class="chapter-badge badge-fundamentals"><i class="fas fa-terminal"></i> Reference</div>
+      <h2>CLI Command Key</h2>
+      <p>Every Shopify CLI command you'll actually use — organized by category and copy-ready.</p>
+    </div>
+
+    <div class="callout callout-info"><i class="fas fa-circle-info"></i><p>All commands require the CLI: <code>npm install -g @shopify/cli @shopify/theme</code>. Commands marked <strong>--store</strong> require <code>--store your-store.myshopify.com</code>.</p></div>
+
+    <h3>Theme Commands</h3>
+    <div class="table-wrap"><table><thead><tr><th>Command</th><th>What It Does</th></tr></thead><tbody>
+      <tr><td><code>shopify theme init [name]</code></td><td>Scaffold a new theme from Dawn (Shopify's reference theme)</td></tr>
+      <tr><td><code>shopify theme dev --store &lt;url&gt;</code></td><td>Start local dev server — live-reloads on save</td></tr>
+      <tr><td><code>shopify theme pull --store &lt;url&gt;</code></td><td>Download the active theme from your store to local</td></tr>
+      <tr><td><code>shopify theme push --store &lt;url&gt;</code></td><td>Upload local theme files to your store</td></tr>
+      <tr><td><code>shopify theme push --unpublished</code></td><td>Push as a new unpublished theme (safe — doesn't replace live)</td></tr>
+      <tr><td><code>shopify theme list --store &lt;url&gt;</code></td><td>List all themes on the store with their IDs</td></tr>
+      <tr><td><code>shopify theme check</code></td><td>Lint Liquid files for errors and accessibility issues</td></tr>
+      <tr><td><code>shopify theme package</code></td><td>Zip the theme for submission to the Theme Store</td></tr>
+      <tr><td><code>shopify theme delete --store &lt;url&gt;</code></td><td>Delete a theme from the store (prompts to confirm)</td></tr>
+      <tr><td><code>shopify theme open --store &lt;url&gt;</code></td><td>Open the store's theme editor in your browser</td></tr>
+    </tbody></table></div>
+
+    <div class="callout callout-tip"><i class="fas fa-lightbulb"></i><p><strong>Safe deploy pattern:</strong> <code>theme push --unpublished</code> first to preview, then publish from Admin. Never push directly to the live theme without reviewing.</p></div>
+
+    <h3>App Commands</h3>
+    <div class="table-wrap"><table><thead><tr><th>Command</th><th>What It Does</th></tr></thead><tbody>
+      <tr><td><code>shopify app init</code></td><td>Create a new app project (prompts for template and name)</td></tr>
+      <tr><td><code>shopify app dev</code></td><td>Start the app dev server with tunnel + hot reload</td></tr>
+      <tr><td><code>shopify app build</code></td><td>Build the app for production</td></tr>
+      <tr><td><code>shopify app deploy</code></td><td>Deploy app extensions to Shopify</td></tr>
+      <tr><td><code>shopify app generate extension</code></td><td>Add a new extension to an existing app (UI, function, webhook)</td></tr>
+      <tr><td><code>shopify app info</code></td><td>Display app configuration and extension details</td></tr>
+      <tr><td><code>shopify app env show</code></td><td>Show environment variables for the current app</td></tr>
+      <tr><td><code>shopify app config link</code></td><td>Link a local app to an existing Partner Dashboard app</td></tr>
+    </tbody></table></div>
+
+    <h3>Auth and Account</h3>
+    <div class="table-wrap"><table><thead><tr><th>Command</th><th>What It Does</th></tr></thead><tbody>
+      <tr><td><code>shopify auth login</code></td><td>Authenticate with your Shopify Partner account</td></tr>
+      <tr><td><code>shopify auth logout</code></td><td>Log out of the current session</td></tr>
+      <tr><td><code>shopify whoami</code></td><td>Show the currently authenticated account</td></tr>
+    </tbody></table></div>
+
+    <h3>General / Utility</h3>
+    <div class="table-wrap"><table><thead><tr><th>Command</th><th>What It Does</th></tr></thead><tbody>
+      <tr><td><code>shopify version</code></td><td>Show installed CLI version</td></tr>
+      <tr><td><code>shopify upgrade</code></td><td>Upgrade the CLI to the latest version</td></tr>
+      <tr><td><code>shopify help</code></td><td>List all available commands</td></tr>
+      <tr><td><code>shopify &lt;command&gt; --help</code></td><td>Show detailed flags and usage for any command</td></tr>
+    </tbody></table></div>
+
+    <h3>Common Flag Reference</h3>
+    <div class="table-wrap"><table><thead><tr><th>Flag</th><th>Applies To</th><th>What It Does</th></tr></thead><tbody>
+      <tr><td><code>--store &lt;url&gt;</code></td><td>theme commands</td><td>Target store (e.g. <code>mystore.myshopify.com</code>)</td></tr>
+      <tr><td><code>--theme &lt;id|name&gt;</code></td><td>theme push/pull</td><td>Target a specific theme by ID or name</td></tr>
+      <tr><td><code>--unpublished</code></td><td>theme push</td><td>Push as a new draft theme — doesn't touch live</td></tr>
+      <tr><td><code>--only &lt;files&gt;</code></td><td>theme push/pull</td><td>Sync only specific files or directories</td></tr>
+      <tr><td><code>--ignore &lt;pattern&gt;</code></td><td>theme push/pull</td><td>Skip files matching a glob pattern</td></tr>
+      <tr><td><code>--live-reload</code></td><td>theme dev</td><td>Control reload mode: <code>hot-reload</code>, <code>full-page</code>, <code>off</code></td></tr>
+      <tr><td><code>--path &lt;dir&gt;</code></td><td>most commands</td><td>Run command against a specific directory</td></tr>
+      <tr><td><code>--json</code></td><td>theme list</td><td>Output results as JSON for scripting</td></tr>
+      <tr><td><code>--force</code></td><td>theme delete</td><td>Skip confirmation prompt</td></tr>
+      <tr><td><code>--verbose</code></td><td>any</td><td>Show detailed debug output</td></tr>
+    </tbody></table></div>
+
+    <h3>Everyday Workflow Cheatsheet</h3>
+    <div class="code-block"><div class="code-header"><span class="code-lang">Terminal — Daily Dev Workflow</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre># 1. First time setup
+shopify auth login
+shopify theme init my-theme
+cd my-theme
+
+# 2. Start developing
+shopify theme dev --store mystore.myshopify.com
+
+# 3. Lint before pushing
+shopify theme check
+
+# 4. Safe push (as unpublished draft)
+shopify theme push --unpublished --store mystore.myshopify.com
+
+# 5. See all themes
+shopify theme list --store mystore.myshopify.com</pre></div>
+
+    <div class="code-block"><div class="code-header"><span class="code-lang">Terminal — Sync Specific Files Only</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre># Pull only templates and sections
+shopify theme pull --only templates/ sections/ --store mystore.myshopify.com
+
+# Push only assets (CSS/JS changes)
+shopify theme push --only assets/ --store mystore.myshopify.com</pre></div>
+
+    <div class="callout callout-warn"><i class="fas fa-triangle-exclamation"></i><p><strong>Never use <code>--force</code> on a live theme</strong> without a backup. Run <code>shopify theme list</code> first to confirm theme IDs before deleting anything.</p></div>
+
+    <nav class="chapter-nav">
+      <button class="chapter-nav-btn" data-goto="ch13"><div class="nav-label">Previous</div><div class="nav-title">Client Handoff Guide</div></button>
       <button class="chapter-nav-btn next" disabled><div class="nav-label">Next</div><div class="nav-title">— You've reached the end!</div></button>
     </nav>
   </article>
@@ -1081,7 +1184,8 @@ var chapters = {
   ch10: { title:'Best Practices',         section:'Toolkit',           keywords:'performance lazy loading webp accessibility wcag maintainability debugging theme check lighthouse dawn' },
   ch11: { title:'Snippet Vault',          section:'Toolkit',           keywords:'snippet announcement bar back to top trust badges sale badge faq newsletter copy paste' },
   ch12: { title:'Launch Checklist',       section:'Toolkit',           keywords:'launch go live checklist dns ssl payment shipping tax product collection seo performance mobile analytics' },
-  ch13: { title:'Client Handoff Guide',   section:'Client Guide',      keywords:'client handoff merchant training theme editor colors fonts sections products orders fulfill refund apps' }
+  ch13: { title:'Client Handoff Guide',   section:'Client Guide',      keywords:'client handoff merchant training theme editor colors fonts sections products orders fulfill refund apps' },
+  ch14: { title:'CLI Command Key',         section:'Reference',          keywords:'shopify cli terminal command theme dev push pull check init app auth login logout version upgrade extension generate list delete package' }
 };
 
 var completedChapters = JSON.parse(localStorage.getItem('completedChapters') || '{}');
