@@ -20,6 +20,26 @@
     --border:#2a2b34;--border-light:#22232b;
     --sidebar-w:280px;--header-h:60px;--radius:10px;--radius-sm:6px;
   }
+  [data-theme="light"] {
+    --bg:#f8f7f4;--bg-elevated:#ffffff;--bg-card:#f0eeeb;--bg-code:#eceae6;
+    --fg:#1a1917;--fg-muted:#5a5750;--fg-dim:#9a9890;
+    --accent:#c4851a;--accent-dim:rgba(196,133,26,0.1);
+    --green:#2d8a3e;--green-dim:rgba(45,138,62,0.1);
+    --red:#c0392b;--red-dim:rgba(192,57,43,0.08);
+    --blue:#2272b8;--blue-dim:rgba(34,114,184,0.08);
+    --purple:#7c4db8;--purple-dim:rgba(124,77,184,0.08);
+    --teal:#1a8f85;--teal-dim:rgba(26,143,133,0.1);
+    --border:#dddad4;--border-light:#e8e5e0;
+  }
+  [data-theme="light"] .bg-atmosphere{opacity:0.3;}
+  [data-theme="light"] .top-bar{background:rgba(248,247,244,0.85);}
+  [data-theme="light"] code[class*="language-"],
+  [data-theme="light"] pre[class*="language-"]{color:#3a3835;}
+  [data-theme="light"] .token.comment,.token.prolog{color:#9a9890;}
+  .theme-toggle{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);
+    color:var(--fg-muted);width:32px;height:32px;display:flex;align-items:center;
+    justify-content:center;cursor:pointer;transition:all 0.2s;flex-shrink:0;font-size:14px;}
+  .theme-toggle:hover{color:var(--fg);border-color:var(--fg-dim);}
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--fg-dim) transparent;}
   body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--fg);line-height:1.7;font-size:15px;overflow-x:hidden;}
@@ -269,10 +289,11 @@
     <button class="nav-item" data-chapter="ch13"><i class="fas fa-handshake-angle"></i> Client Handoff <span class="chapter-num">13</span></button>
     <span class="nav-section-label">Reference</span>
     <button class="nav-item" data-chapter="ch14"><i class="fas fa-terminal"></i> CLI Command Key <span class="chapter-num">14</span></button>
+    <button class="nav-item" data-chapter="ch15"><i class="fas fa-database"></i> Metafields &amp; Metaobjects <span class="chapter-num">15</span></button>
   </nav>
   <div class="sidebar-footer">
     <div style="display:flex;justify-content:space-between;align-items:center;">
-      <span id="progressText">0 / 14 completed</span>
+      <span id="progressText">0 / 15 completed</span>
       <span id="progressPercent">0%</span>
     </div>
     <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
@@ -287,6 +308,7 @@
     <div class="breadcrumb" id="breadcrumb"><span>Getting Started</span> / Architecture Overview</div>
     <div class="top-bar-right">
       <button class="top-btn" id="searchBtn"><i class="fas fa-search"></i> Search <kbd>Ctrl+K</kbd></button>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode"><i class="fas fa-sun"></i></button>
       <button class="top-btn primary" id="markCompleteBtn"><i class="fas fa-check"></i> Mark Complete</button>
     </div>
   </header>
@@ -1356,6 +1378,139 @@ shopify theme push --only assets/ --store mystore.myshopify.com</pre></div>
 
     <nav class="chapter-nav">
       <button class="chapter-nav-btn" data-goto="ch13"><div class="nav-label">Previous</div><div class="nav-title">Client Handoff Guide</div></button>
+      <button class="chapter-nav-btn next" data-goto="ch15"><div class="nav-label">Next Chapter</div><div class="nav-title">Metafields &amp; Metaobjects</div></button>
+    </nav>
+  </article>
+
+  <!-- CH15 -->
+  <article class="chapter" id="ch15">
+    <div class="chapter-header">
+      <div class="chapter-badge badge-api"><i class="fas fa-database"></i> Reference</div>
+      <h2>Metafields &amp; Metaobjects</h2>
+      <p>Store custom data on any Shopify resource — no app required. The key to building truly custom storefronts.</p>
+    </div>
+
+    <div class="callout callout-info"><i class="fas fa-circle-info"></i><p><strong>When do you need this?</strong> Whenever you want to attach structured data to a product, variant, collection, or page that doesn't fit into standard Shopify fields — ingredients, specifications, fit guides, certifications, related videos, etc.</p></div>
+
+    <h3>Metafields vs. Metaobjects</h3>
+    <div class="table-wrap"><table><thead><tr><th></th><th>Metafields</th><th>Metaobjects</th></tr></thead><tbody>
+      <tr><td><strong>What</strong></td><td>Custom fields attached to an existing resource (product, page, etc.)</td><td>Standalone custom content types you define (like a "Team Member" or "Size Chart")</td></tr>
+      <tr><td><strong>Example</strong></td><td>Adding "Care Instructions" to every product</td><td>A "Testimonial" type reusable across the site</td></tr>
+      <tr><td><strong>Access</strong></td><td><code>product.metafields.namespace.key</code></td><td><code>shop.metaobjects.type.handle</code> or via Liquid metaobject references</td></tr>
+      <tr><td><strong>Set up in</strong></td><td>Admin → Settings → Custom data</td><td>Admin → Settings → Custom data → Metaobject definitions</td></tr>
+    </tbody></table></div>
+
+    <h3>Setting Up Metafields</h3>
+    <ol class="step-list">
+      <li>Go to <strong>Admin → Settings → Custom data</strong></li>
+      <li>Choose the resource type (Products, Variants, Collections, Pages, etc.)</li>
+      <li>Click <strong>Add definition</strong></li>
+      <li>Set a <strong>Namespace</strong> (e.g. <code>custom</code>) and <strong>Key</strong> (e.g. <code>care_instructions</code>)</li>
+      <li>Choose a <strong>Type</strong> (single line text, rich text, number, file, color, JSON, etc.)</li>
+      <li>Enable <strong>Storefront access</strong> if you need it via the Storefront API</li>
+    </ol>
+    <div class="callout callout-tip"><i class="fas fa-lightbulb"></i><p>Use <code>custom</code> as your namespace for store-specific fields. Reserve other namespaces (e.g. <code>reviews</code>, <code>seo</code>) for apps that may write to the same resource.</p></div>
+
+    <h3>Accessing Metafields in Liquid</h3>
+    <div class="code-block"><div class="code-header"><span class="code-lang">Liquid</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre>{% comment %} Syntax: resource.metafields.namespace.key {% endcomment %}
+
+{{ product.metafields.custom.care_instructions }}
+{{ product.metafields.custom.ingredient_list }}
+{{ product.metafields.custom.video_url }}
+
+{% comment %} Output the value of a specific type {% endcomment %}
+{% assign specs = product.metafields.custom.specifications.value %}
+{% for spec in specs %}
+  &lt;li&gt;{{ spec }}&lt;/li&gt;
+{% endfor %}
+
+{% comment %} Rich text metafields use .value {% endcomment %}
+{{ product.metafields.custom.care_instructions.value }}</pre></div>
+
+    <div class="callout callout-warn"><i class="fas fa-triangle-exclamation"></i><p>Always check if a metafield exists before outputting it: <code>{% if product.metafields.custom.care_instructions != blank %}</code> — otherwise you'll render an empty element.</p></div>
+
+    <h3>Metafield Types Reference</h3>
+    <div class="table-wrap"><table><thead><tr><th>Type</th><th>Liquid Access</th><th>Use Case</th></tr></thead><tbody>
+      <tr><td><code>single_line_text_field</code></td><td><code>metafields.custom.key</code></td><td>Subtitle, SKU note, short label</td></tr>
+      <tr><td><code>multi_line_text_field</code></td><td><code>metafields.custom.key</code></td><td>Long description, care notes</td></tr>
+      <tr><td><code>rich_text_field</code></td><td><code>metafields.custom.key.value</code></td><td>Formatted copy with bold/links</td></tr>
+      <tr><td><code>number_integer</code></td><td><code>metafields.custom.key</code></td><td>Unit count, weight, rating</td></tr>
+      <tr><td><code>file_reference</code></td><td><code>metafields.custom.key.value</code></td><td>Extra images, PDFs, size charts</td></tr>
+      <tr><td><code>product_reference</code></td><td><code>metafields.custom.key.value</code></td><td>Related/paired product</td></tr>
+      <tr><td><code>list.single_line_text_field</code></td><td><code>metafields.custom.key.value</code> (array)</td><td>Ingredients, features list</td></tr>
+      <tr><td><code>json</code></td><td><code>metafields.custom.key.value</code> (parsed)</td><td>Structured spec tables, size charts</td></tr>
+      <tr><td><code>color</code></td><td><code>metafields.custom.key</code></td><td>Accent color per product</td></tr>
+      <tr><td><code>url</code></td><td><code>metafields.custom.key</code></td><td>Video link, external resource</td></tr>
+    </tbody></table></div>
+
+    <h3>Practical Example: Product Specifications Table</h3>
+    <div class="code-block"><div class="code-header"><span class="code-lang">Liquid — sections/main-product.liquid</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre>{% assign specs = product.metafields.custom.specifications.value %}
+{% if specs != blank %}
+  &lt;h3&gt;Specifications&lt;/h3&gt;
+  &lt;table&gt;
+    &lt;tbody&gt;
+      {% for row in specs %}
+        &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;{{ row.label }}&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;{{ row.value }}&lt;/td&gt;
+        &lt;/tr&gt;
+      {% endfor %}
+    &lt;/tbody&gt;
+  &lt;/table&gt;
+{% endif %}</pre></div>
+    <p>Store the data as a JSON metafield on the product — e.g. <code>[{"label":"Material","value":"100% Cotton"},{"label":"Weight","value":"220g"}]</code> — and it renders as a clean table.</p>
+
+    <h3>Metaobjects</h3>
+    <p>Metaobjects are custom content types you define once and reuse anywhere. Think of them like a lightweight CMS: you define the schema, merchants fill in the entries, and you render them in Liquid.</p>
+
+    <ol class="step-list">
+      <li>Go to <strong>Admin → Settings → Custom data → Metaobject definitions</strong></li>
+      <li>Click <strong>Add definition</strong>, give it a type handle (e.g. <code>team_member</code>)</li>
+      <li>Add fields: <code>name</code> (single line text), <code>role</code> (single line text), <code>photo</code> (file reference), <code>bio</code> (multi-line text)</li>
+      <li>Go to <strong>Admin → Content → Metaobjects</strong> to add entries</li>
+      <li>Reference entries in Liquid via a <code>metaobject_reference</code> metafield, or loop all entries with the Storefront API</li>
+    </ol>
+
+    <h3>Rendering a Metaobject Reference in Liquid</h3>
+    <div class="code-block"><div class="code-header"><span class="code-lang">Liquid</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre>{% comment %}
+  Product has a metafield: custom.fit_guide → metaobject_reference
+  The referenced metaobject type: fit_guide (fields: title, image, chart_html)
+{% endcomment %}
+
+{% assign fit = product.metafields.custom.fit_guide.value %}
+{% if fit != blank %}
+  &lt;div class="fit-guide"&gt;
+    &lt;h3&gt;{{ fit.title }}&lt;/h3&gt;
+    {% if fit.image != blank %}
+      &lt;img src="{{ fit.image | image_url: width: 800 }}" alt="Fit Guide"&gt;
+    {% endif %}
+    {{ fit.chart_html }}
+  &lt;/div&gt;
+{% endif %}</pre></div>
+
+    <div class="collapsible"><button class="collapsible-trigger">Querying Metaobjects via Storefront API <i class="fas fa-chevron-down"></i></button><div class="collapsible-body"><div class="collapsible-inner">
+      <p>When you need all entries of a metaobject type (e.g. all team members for a page), use the Storefront API — Liquid can only access metaobjects attached to a specific resource via a reference field.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre>const query = `{
+  metaobjects(type: "team_member", first: 20) {
+    nodes {
+      handle
+      field(key: "name")   { value }
+      field(key: "role")   { value }
+      field(key: "bio")    { value }
+    }
+  }
+}`;
+const { data } = await storefrontQuery(query);</pre></div>
+    </div></div></div>
+
+    <div class="callout callout-danger"><i class="fas fa-circle-xmark"></i><p><strong>Don't use metafields for data that changes frequently</strong> (e.g. live inventory, pricing). They're cached aggressively. For dynamic data, use the Storefront API or Cart API from JavaScript.</p></div>
+
+    <nav class="chapter-nav">
+      <button class="chapter-nav-btn" data-goto="ch14"><div class="nav-label">Previous</div><div class="nav-title">CLI Command Key</div></button>
       <button class="chapter-nav-btn next" disabled><div class="nav-label">Next</div><div class="nav-title">— You've reached the end!</div></button>
     </nav>
   </article>
@@ -1388,7 +1543,8 @@ var chapters = {
   ch11: { title:'Snippet Vault',          section:'Toolkit',           keywords:'snippet announcement bar back to top trust badges sale badge faq newsletter copy paste' },
   ch12: { title:'Launch Checklist',       section:'Toolkit',           keywords:'launch go live checklist dns ssl payment shipping tax product collection seo performance mobile analytics' },
   ch13: { title:'Client Handoff Guide',   section:'Client Guide',      keywords:'client handoff merchant training theme editor colors fonts sections products orders fulfill refund apps' },
-  ch14: { title:'CLI Command Key',         section:'Reference',          keywords:'shopify cli terminal command theme dev push pull check init app auth login logout version upgrade extension generate list delete package' }
+  ch14: { title:'CLI Command Key',         section:'Reference',          keywords:'shopify cli terminal command theme dev push pull check init app auth login logout version upgrade extension generate list delete package' },
+  ch15: { title:'Metafields & Metaobjects', section:'Reference',          keywords:'metafield metaobject custom data namespace key product variant collection page shop liquid storefront api definition admin' }
 };
 
 var completedChapters = JSON.parse(localStorage.getItem('completedChapters') || '{}');
@@ -1410,6 +1566,7 @@ function goToChapter(id) {
   btn.innerHTML = completedChapters[id]
     ? '<i class="fas fa-check"></i> Completed!'
     : '<i class="fas fa-check"></i> Mark Complete';
+  localStorage.setItem('lastChapter', id);
   window.scrollTo(0, 0);
   if (window.innerWidth < 900) closeSidebar();
 }
@@ -1532,6 +1689,27 @@ document.getElementById('menuToggle').addEventListener('click', function() {
 overlay.addEventListener('click', closeSidebar);
 
 updateProgress();
+
+// Resume last visited chapter
+var lastChapter = localStorage.getItem('lastChapter');
+if (lastChapter && document.getElementById(lastChapter)) {
+  goToChapter(lastChapter);
+}
+
+// Light/dark mode toggle
+var themeToggle = document.getElementById('themeToggle');
+var currentTheme = localStorage.getItem('theme') || 'dark';
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : '');
+  themeToggle.innerHTML = t === 'light' ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+  themeToggle.title = t === 'light' ? 'Switch to dark mode' : 'Switch to light mode';
+  localStorage.setItem('theme', t);
+  currentTheme = t;
+}
+applyTheme(currentTheme);
+themeToggle.addEventListener('click', function() {
+  applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+});
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
