@@ -6,6 +6,7 @@
 <title>Shopify Dev Manual — Beginner to Intermediate</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <style>
   :root {
     --bg:#0e0f13;--bg-elevated:#15161c;--bg-card:#1a1b23;--bg-code:#12131a;
@@ -219,6 +220,20 @@
     .quick-ref-grid{grid-template-columns:repeat(2,1fr);}
   }
   @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important;}}
+
+  /* Prism overrides — transparent bg so our code-block styling wins */
+  code[class*="language-"],pre[class*="language-"]{background:transparent!important;text-shadow:none!important;font-size:13px!important;line-height:1.75!important;font-family:'JetBrains Mono',monospace!important;}
+  /* Token palette mapped to our CSS vars */
+  .token.comment,.token.prolog,.token.doctype,.token.cdata{color:var(--fg-dim);}
+  .token.punctuation{color:var(--fg-muted);}
+  .token.property,.token.tag,.token.boolean,.token.number,.token.constant,.token.symbol,.token.deleted{color:var(--purple);}
+  .token.selector,.token.attr-name,.token.string,.token.char,.token.builtin,.token.inserted{color:var(--green);}
+  .token.operator,.token.entity,.token.url,.language-css .token.string,.style .token.string{color:var(--teal);}
+  .token.atrule,.token.attr-value,.token.keyword{color:var(--accent);}
+  .token.function,.token.class-name{color:var(--blue);}
+  .token.regex,.token.important,.token.variable{color:var(--red);}
+  .token.important,.token.bold{font-weight:700;}
+  .token.italic{font-style:italic;}
 </style>
 </head>
 <body>
@@ -1517,6 +1532,38 @@ document.getElementById('menuToggle').addEventListener('click', function() {
 overlay.addEventListener('click', closeSidebar);
 
 updateProgress();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-liquid.min.js"></script>
+<script>
+(function() {
+  var langMap = {
+    'liquid':      ['liquid',      Prism.languages.liquid],
+    'javascript':  ['javascript',  Prism.languages.javascript],
+    'json':        ['json',        Prism.languages.json],
+    'terminal':    ['bash',        Prism.languages.bash],
+    'bash':        ['bash',        Prism.languages.bash]
+  };
+
+  document.querySelectorAll('.code-block').forEach(function(block) {
+    var labelEl = block.querySelector('.code-lang');
+    var pre     = block.querySelector('pre');
+    if (!labelEl || !pre) return;
+
+    var label = labelEl.textContent.toLowerCase().trim();
+    var match = null;
+    Object.keys(langMap).forEach(function(key) {
+      if (!match && label.startsWith(key)) match = langMap[key];
+    });
+
+    if (match && match[1]) {
+      var text = pre.textContent;
+      pre.innerHTML = Prism.highlight(text, match[1], match[0]);
+    }
+  });
+})();
 </script>
 </body>
 </html>
