@@ -290,10 +290,11 @@
     <span class="nav-section-label">Reference</span>
     <button class="nav-item" data-chapter="ch14"><i class="fas fa-terminal"></i> CLI Command Key <span class="chapter-num">14</span></button>
     <button class="nav-item" data-chapter="ch15"><i class="fas fa-database"></i> Metafields &amp; Metaobjects <span class="chapter-num">15</span></button>
+    <button class="nav-item" data-chapter="ch16"><i class="fas fa-bolt"></i> Shopify Functions <span class="chapter-num">16</span></button>
   </nav>
   <div class="sidebar-footer">
     <div style="display:flex;justify-content:space-between;align-items:center;">
-      <span id="progressText">0 / 15 completed</span>
+      <span id="progressText">0 / 16 completed</span>
       <span id="progressPercent">0%</span>
     </div>
     <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
@@ -1511,6 +1512,174 @@ const { data } = await storefrontQuery(query);</pre></div>
 
     <nav class="chapter-nav">
       <button class="chapter-nav-btn" data-goto="ch14"><div class="nav-label">Previous</div><div class="nav-title">CLI Command Key</div></button>
+      <button class="chapter-nav-btn next" data-goto="ch16"><div class="nav-label">Next Chapter</div><div class="nav-title">Shopify Functions</div></button>
+    </nav>
+  </article>
+
+  <!-- CH16 -->
+  <article class="chapter" id="ch16">
+    <div class="chapter-header">
+      <div class="chapter-badge badge-api"><i class="fas fa-bolt"></i> Reference</div>
+      <h2>Shopify Functions</h2>
+      <p>Server-side logic that runs on Shopify's own infrastructure — customize discounts, cart behavior, delivery, and payments without a hosted server.</p>
+    </div>
+
+    <div class="callout callout-info"><i class="fas fa-circle-info"></i><p><strong>What makes Functions different:</strong> Unlike webhooks (which react after an event), Functions intercept Shopify's own processing pipeline. They run <em>inside</em> Shopify in under 5ms, compiled to WebAssembly. You write JS/TS or Rust — Shopify runs it.</p></div>
+
+    <h3>Function Types</h3>
+    <div class="table-wrap"><table><thead><tr><th>Function Type</th><th>What You Can Do</th></tr></thead><tbody>
+      <tr><td><strong>Discounts</strong></td><td>Tiered pricing, BOGO, volume discounts, custom coupon logic</td></tr>
+      <tr><td><strong>Cart and Checkout Validation</strong></td><td>Block checkout if cart rules aren't met (min quantity, restricted combos)</td></tr>
+      <tr><td><strong>Cart Transform</strong></td><td>Merge, expand, or modify line items before checkout (bundle unpacking)</td></tr>
+      <tr><td><strong>Delivery Customization</strong></td><td>Hide, rename, or reorder shipping options based on cart contents</td></tr>
+      <tr><td><strong>Payment Customization</strong></td><td>Hide or reorder payment methods (e.g. hide COD for high-value orders)</td></tr>
+      <tr><td><strong>Order Routing</strong></td><td>Direct fulfillment to specific locations based on custom rules</td></tr>
+    </tbody></table></div>
+
+    <h3>How Functions Work</h3>
+    <div class="diagram">
+      <div class="diagram-row">
+        <div><div class="diagram-box gold">Customer Action</div><div class="diagram-label">Add to cart, apply discount, checkout</div></div>
+        <div class="diagram-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div><div class="diagram-box blue">Shopify Pipeline</div><div class="diagram-label">Calls your Function</div></div>
+        <div class="diagram-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div><div class="diagram-box green">Your Function</div><div class="diagram-label">JSON in → logic → JSON out</div></div>
+      </div>
+      <div class="diagram-row" style="margin-top:8px">
+        <div><div class="diagram-box purple">Output Applied</div><div class="diagram-label">Discount, hide option, block, transform</div></div>
+        <div class="diagram-arrow"><i class="fas fa-arrow-left"></i></div>
+        <div><div class="diagram-box gold">Shopify</div><div class="diagram-label">Applies result instantly</div></div>
+      </div>
+    </div>
+
+    <h3>Creating a Function</h3>
+    <div class="callout callout-warn"><i class="fas fa-triangle-exclamation"></i><p>Functions must live inside a <strong>Shopify app</strong> — they can't be standalone. If you only need a discount, a Custom App (Admin → Apps → Develop apps) is the lightest-weight approach.</p></div>
+    <div class="code-block"><div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre># 1. Create or enter an existing app
+shopify app init
+cd my-app
+
+# 2. Generate a function extension
+shopify app generate extension
+# → choose "Discount" → "Product discount" → name it
+
+# 3. Start dev with tunnel
+shopify app dev
+
+# 4. Deploy when ready
+shopify app deploy</pre></div>
+
+    <h3>The Input / Output Model</h3>
+    <p>Every Function receives a <strong>JSON input</strong> (cart contents, customer data, products, metafields) and must return a <strong>JSON output</strong> (operations to apply). You write a GraphQL query to declare exactly which input fields you need.</p>
+
+    <div class="tabs"><div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab(this,'fn-input')">Input Query</button>
+      <button class="tab-btn" onclick="switchTab(this,'fn-logic')">Function Logic</button>
+      <button class="tab-btn" onclick="switchTab(this,'fn-output')">Output Shape</button>
+    </div>
+    <div class="tab-panel active" id="fn-input">
+      <div class="code-block"><div class="code-header"><span class="code-lang">JavaScript — input.graphql</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre>query Input {
+  cart {
+    lines {
+      quantity
+      merchandise {
+        ... on ProductVariant {
+          id
+          product {
+            id
+            hasAnyTag(tags: ["volume-deal"])
+          }
+        }
+      }
+    }
+  }
+}</pre></div>
+    </div>
+    <div class="tab-panel" id="fn-logic">
+      <div class="code-block"><div class="code-header"><span class="code-lang">JavaScript — index.js</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre>import { InputQuery, FunctionResult, DiscountApplicationStrategy } from "../generated/api";
+
+const DISCOUNT_STRATEGY = DiscountApplicationStrategy.First;
+
+export function run(input) {
+  const targets = [];
+  const discounts = [];
+
+  for (const line of input.cart.lines) {
+    const variant = line.merchandise;
+    if (!variant?.product?.hasAnyTag) continue;
+
+    // 10% off if qty >= 3, 20% off if qty >= 6
+    let pct = 0;
+    if (line.quantity >= 6) pct = 20;
+    else if (line.quantity >= 3) pct = 10;
+    if (pct === 0) continue;
+
+    targets.push({ cartLine: { id: variant.id } });
+    discounts.push({
+      targets,
+      value: { percentage: { value: String(pct) } },
+      message: `Volume deal: ${pct}% off`
+    });
+  }
+
+  return {
+    discounts,
+    discountApplicationStrategy: DISCOUNT_STRATEGY
+  };
+}</pre></div>
+    </div>
+    <div class="tab-panel" id="fn-output">
+      <div class="code-block"><div class="code-header"><span class="code-lang">JSON — example output</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre>{
+  "discounts": [
+    {
+      "targets": [{ "cartLine": { "id": "gid://shopify/CartLine/abc123" } }],
+      "value": { "percentage": { "value": "10" } },
+      "message": "Volume deal: 10% off"
+    }
+  ],
+  "discountApplicationStrategy": "FIRST"
+}</pre></div>
+    </div></div>
+
+    <h3>Key Constraints</h3>
+    <div class="table-wrap"><table><thead><tr><th>Constraint</th><th>Detail</th></tr></thead><tbody>
+      <tr><td><strong>Execution time</strong></td><td>Must complete in <strong>5ms</strong> — no network calls, no async</td></tr>
+      <tr><td><strong>Memory</strong></td><td>10MB max</td></tr>
+      <tr><td><strong>No I/O</strong></td><td>Can't call external APIs — all data comes through the input query</td></tr>
+      <tr><td><strong>Input limit</strong></td><td>GraphQL input query has a complexity limit — keep it lean</td></tr>
+      <tr><td><strong>Requires a Plan</strong></td><td>Functions require Shopify Basic plan or higher</td></tr>
+      <tr><td><strong>Deployed via app</strong></td><td>Can't be standalone — must be an app extension</td></tr>
+    </tbody></table></div>
+
+    <h3>Practical Use Cases</h3>
+    <div class="collapsible"><button class="collapsible-trigger">Volume / Tiered Discounts <i class="fas fa-chevron-down"></i></button><div class="collapsible-body"><div class="collapsible-inner">
+      <p>Automatic percentage off based on quantity in cart. Tag products with <code>volume-deal</code>, read the tag in your input query, apply the discount in your function. No discount code needed — fires automatically at checkout.</p>
+    </div></div></div>
+    <div class="collapsible"><button class="collapsible-trigger">Hide Shipping Methods by Rule <i class="fas fa-chevron-down"></i></button><div class="collapsible-body"><div class="collapsible-inner">
+      <p>Use a Delivery Customization function to hide "Express Shipping" if the cart contains a pre-order item, or hide "Local Pickup" if the customer's province isn't in your delivery zone. Read <code>cart.deliveryGroups</code> in your input, return a <code>hideOperation</code> for each method to suppress.</p>
+    </div></div></div>
+    <div class="collapsible"><button class="collapsible-trigger">Block Checkout on Cart Rules <i class="fas fa-chevron-down"></i></button><div class="collapsible-body"><div class="collapsible-inner">
+      <p>Cart and Checkout Validation functions can return errors that block the customer from proceeding. Example: require a minimum order of $50, or prevent mixing sale and full-price items in the same cart.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">JavaScript — validation output</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre>// Block checkout with a message
+return {
+  errors: [{
+    localizedMessage: "Minimum order is $50. Add more to continue.",
+    target: "cart"
+  }]
+};</pre></div>
+    </div></div></div>
+    <div class="collapsible"><button class="collapsible-trigger">Bundle Expansion (Cart Transform) <i class="fas fa-chevron-down"></i></button><div class="collapsible-body"><div class="collapsible-inner">
+      <p>A merchant sells a "Starter Kit" product. When it hits the cart, a Cart Transform function <em>expands</em> it into its 3 component line items — each with its own fulfillment, inventory, and pricing. The customer sees the bundle; fulfillment sees individual items.</p>
+    </div></div></div>
+
+    <div class="callout callout-tip"><i class="fas fa-lightbulb"></i><p><strong>Test locally with mocked input:</strong> Create a <code>src/run.test.js</code> file and pass fixture JSON directly to your <code>run()</code> function. No need to go through the full dev tunnel for unit-testing logic.</p></div>
+
+    <nav class="chapter-nav">
+      <button class="chapter-nav-btn" data-goto="ch15"><div class="nav-label">Previous</div><div class="nav-title">Metafields &amp; Metaobjects</div></button>
       <button class="chapter-nav-btn next" disabled><div class="nav-label">Next</div><div class="nav-title">— You've reached the end!</div></button>
     </nav>
   </article>
@@ -1544,7 +1713,8 @@ var chapters = {
   ch12: { title:'Launch Checklist',       section:'Toolkit',           keywords:'launch go live checklist dns ssl payment shipping tax product collection seo performance mobile analytics' },
   ch13: { title:'Client Handoff Guide',   section:'Client Guide',      keywords:'client handoff merchant training theme editor colors fonts sections products orders fulfill refund apps' },
   ch14: { title:'CLI Command Key',         section:'Reference',          keywords:'shopify cli terminal command theme dev push pull check init app auth login logout version upgrade extension generate list delete package' },
-  ch15: { title:'Metafields & Metaobjects', section:'Reference',          keywords:'metafield metaobject custom data namespace key product variant collection page shop liquid storefront api definition admin' }
+  ch15: { title:'Metafields & Metaobjects', section:'Reference',          keywords:'metafield metaobject custom data namespace key product variant collection page shop liquid storefront api definition admin' },
+  ch16: { title:'Shopify Functions',        section:'Reference',          keywords:'functions shopify wasm webassembly discount cart transform delivery payment order routing input output javascript typescript rust extension' }
 };
 
 var completedChapters = JSON.parse(localStorage.getItem('completedChapters') || '{}');
